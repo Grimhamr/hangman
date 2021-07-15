@@ -1,10 +1,6 @@
 require_relative 'stages'
 
-    
-
-
-  class Game
-    
+  class Game    
     @current_stage
     @word
     def initialize
@@ -21,28 +17,23 @@ require_relative 'stages'
                 end
     end
 
-
         def new_game
-        dictionary_file = File.open("dictionary.txt","r")
-        @@dictionary=[]
-        dictionary_file.each_line do |word|
-             @@dictionary.push(word.downcase)
-                                end
-        dictionary_file.close 
-        puts "dictionary #{@@dictionary.class} initialized"
-        @stage_index=-1
-        @wrong_guesses = []
-
-            @word = @@dictionary.sample.chomp
-
-            
+            dictionary_file = File.open("dictionary.txt","r")
+            @@dictionary=[]
+            dictionary_file.each_line do |word|
+                @@dictionary.push(word.downcase)
+                                    end
+            dictionary_file.close 
+            puts "dictionary #{@@dictionary.class} initialized"
+            @stage_index=-1
+            @wrong_guesses = []
+            @word = @@dictionary.sample.chomp 
             @word_display = Array.new(@word.length, "_ ")
             round
-    end
+        end
 
     def load_game
         require_relative "saved_game.rb"
-
         @word = Saved_Data::DATA[0]
         @word_display = Saved_Data::DATA[1]
         @wrong_guesses = Saved_Data::DATA[2]
@@ -52,10 +43,7 @@ require_relative 'stages'
 
     def save_game
         puts "Game saved!"
-        
-
         filename = "saved_game.rb"
-
         File.open(filename, "w") do |file|
             file.puts "module Saved_Data"
             file.puts "DATA = ['#{@word}', #{@word_display}, #{@wrong_guesses}, #{@stage_index}]"
@@ -63,24 +51,24 @@ require_relative 'stages'
             end
          exit
     end
+
     def round
-        
         if @word_display.any?("_ ") == false
             puts @word
             puts "Congratulations! You guessed it!"
             exit
         end
         @current_stage = Stages::STAGES[@stage_index+1]
-        if @stage_index == 5
-            puts @current_stage
-            puts "YOU LOST! The word was '#{@word}'"
-            exit
-        end
+            if @stage_index == 5
+                puts @current_stage
+                puts "YOU LOST! The word was '#{@word}'"
+                exit
+            end
         puts @current_stage
-            puts @word_display.join()
-            puts "Wrong guesses: #{@wrong_guesses.join(",")}"
-         puts "Okay. What's your guess? Type save if you want to continue later"
-            @guess = gets.chomp.downcase
+        puts @word_display.join()
+        puts "Wrong guesses: #{@wrong_guesses.join(",")}"
+        puts "Okay. What's your guess? Type save if you want to continue later"
+        @guess = gets.chomp.downcase
             if @guess == "save"
                 save_game()
             end
@@ -102,7 +90,7 @@ require_relative 'stages'
                 end
                 
             end
-            round
+        round
     end
 
     def guess_validity_checker(guess)
@@ -125,7 +113,6 @@ require_relative 'stages'
         end
     end
 end
-
 
 new_game=Game.new
 
