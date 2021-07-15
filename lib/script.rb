@@ -8,6 +8,21 @@ require_relative 'stages'
     @current_stage
     @word
     def initialize
+        puts "Do you want to start a new game or load your save?
+        1. New
+        2. Load"
+            input = gets.chomp
+                if input == "1"
+                    new_game()
+                elsif input == "2"
+                    load_game()
+                else
+                    initialize()
+                end
+    end
+
+
+        def new_game
         dictionary_file = File.open("dictionary.txt","r")
         @@dictionary=[]
         dictionary_file.each_line do |word|
@@ -23,14 +38,35 @@ require_relative 'stages'
             
             @word_display = Array.new(@word.length, "_ ")
             round
-            
-
     end
 
+    def load_game
+        require_relative "saved_game.rb"
+
+        @word = Saved_Data::DATA[0]
+        @word_display = Saved_Data::DATA[1]
+        @wrong_guesses = Saved_Data::DATA[2]
+        @stage_index = Saved_Data::DATA[3]
+        round
+    end
+
+    def save_game
+        puts "Game saved!"
+        
+
+        filename = "saved_game.rb"
+
+        File.open(filename, "w") do |file|
+            file.puts "module Saved_Data"
+            file.puts "DATA = ['#{@word}', #{@word_display}, #{@wrong_guesses}, #{@stage_index}]"
+            file.puts "end"
+            end
+         exit
+    end
     def round
         
         if @word_display.any?("_ ") == false
-         
+            puts @word
             puts "Congratulations! You guessed it!"
             exit
         end
@@ -43,9 +79,13 @@ require_relative 'stages'
         puts @current_stage
             puts @word_display.join()
             puts "Wrong guesses: #{@wrong_guesses.join(",")}"
-         puts "Okay. What's your guess?"
-            @guess = gets.chomp
+         puts "Okay. What's your guess? Type save if you want to continue later"
+            @guess = gets.chomp.downcase
+            if @guess == "save"
+                save_game()
+            end
             guess_validity_checker(@guess)
+            
             if @word.index(@guess).nil?
                 @stage_index = @stage_index+1
                 @wrong_guesses.push(@guess)
@@ -66,6 +106,9 @@ require_relative 'stages'
     end
 
     def guess_validity_checker(guess)
+        if @guess == "save"
+            save_game()
+        end
         unless @guess.match?(/[[:alpha:]]/) && @guess.length == 1
             puts "#{@guess} is not a letter! This is hangman, don't you know the rules!? Come on, what's your guess?"
             @guess = gets.chomp
