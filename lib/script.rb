@@ -1,7 +1,7 @@
 require_relative 'stages'
 
     
-  #doesn't fill all occurrences of a letter
+
 
   class Game
     
@@ -11,7 +11,7 @@ require_relative 'stages'
         dictionary_file = File.open("dictionary.txt","r")
         @@dictionary=[]
         dictionary_file.each_line do |word|
-             @@dictionary.push(word)
+             @@dictionary.push(word.downcase)
                                 end
         dictionary_file.close 
         puts "dictionary #{@@dictionary.class} initialized"
@@ -19,7 +19,6 @@ require_relative 'stages'
         @wrong_guesses = []
 
             @word = @@dictionary.sample.chomp
-            p "word is #{@word}"
 
             
             @word_display = Array.new(@word.length, "_ ")
@@ -29,32 +28,31 @@ require_relative 'stages'
     end
 
     def round
-        p @word
-        @current_stage = Stages::STAGES[@stage_index+1]
-        if @stage_index == 5
-            puts "YOU LOST"
+        
+        if @word_display.any?("_ ") == false
+         
+            puts "Congratulations! You guessed it!"
             exit
         end
-        #show hangman
+        @current_stage = Stages::STAGES[@stage_index+1]
+        if @stage_index == 5
+            puts @current_stage
+            puts "YOU LOST! The word was '#{@word}'"
+            exit
+        end
         puts @current_stage
             puts @word_display.join()
             puts "Wrong guesses: #{@wrong_guesses.join(",")}"
-         #when player gives letter
          puts "Okay. What's your guess?"
-            #check if only one letter
             @guess = gets.chomp
             guess_validity_checker(@guess)
-            #if @word.index is nil, advance one stage. if not, remove _ from word_display at the index and add the letter
             if @word.index(@guess).nil?
                 @stage_index = @stage_index+1
                 @wrong_guesses.push(@guess)
             else
-                #find index, replace word_display at index with correct letter
                 @word_display[@word.index(@guess)] = @guess
                 i = @word.index(@guess)
                 while i <@word.length
-                    p @word
-                    p "#{i} smaller than #{@word.length}"
                     if @word.index(@guess, i).nil?
                         i = @word.length
                     else
@@ -70,6 +68,15 @@ require_relative 'stages'
     def guess_validity_checker(guess)
         unless @guess.match?(/[[:alpha:]]/) && @guess.length == 1
             puts "#{@guess} is not a letter! This is hangman, don't you know the rules!? Come on, what's your guess?"
+            @guess = gets.chomp
+            guess_validity_checker(@guess)
+        end
+        guess_precedence_checker(guess)
+    end
+
+    def guess_precedence_checker(guess)
+        if @wrong_guesses.include?(guess) || @word_display.include?(guess)
+            puts "You have already guessed this letter. Try another."
             @guess = gets.chomp
             guess_validity_checker(@guess)
         end
